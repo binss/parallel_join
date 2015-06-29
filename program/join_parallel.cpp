@@ -91,15 +91,18 @@ void *mergeSortJoin(void *args){
 
     std::vector<MatchPair> pairs;
 
-    qsort(data->main_data_set, data->main_data_set_len, sizeof(Data), compare);
     qsort(data->foreign_data_set, data->foreign_data_set_len, sizeof(Data), compare);
 
     int i = 0, j = 0;
     while( i < data->main_data_set_len && j < data->foreign_data_set_len){
         if( data->main_data_set[i].key == data->foreign_data_set[j].key ){
             pairs.push_back(MatchPair(data->main_data_set[i].index, data->foreign_data_set[j].index));
-            // i++;
-            j++;
+            if( i == data->main_data_set_len - 1 || j == data->foreign_data_set_len - 1)
+                i++;
+            else if(data->main_data_set[i+1].key > data->main_data_set[j+1].key)
+                j++;
+            else
+                i++;
         }
         else if( data->main_data_set[i].key < data->foreign_data_set[j].key){
             i++;
@@ -108,6 +111,7 @@ void *mergeSortJoin(void *args){
             j++;
         }
     }
+
     printf("Thread %d of %d find %zu pairs\n", data->thread, thread_count, pairs.size());
     // saveResult(pairs);
     return NULL;
@@ -145,7 +149,9 @@ int main(int argc, char * argv[]){
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-
+    if(method == 2){
+        qsort(main_data_set, main_data_set_len, sizeof(Data), compare);
+    }
     for(thread=0; thread < thread_count; thread++){
         struct Thread_data *data = new Thread_data();
         data->main_data_set = main_data_set;
@@ -153,11 +159,14 @@ int main(int argc, char * argv[]){
         data->foreign_data_set = foreign_data_set + thread * part_length;
         data->foreign_data_set_len = part_length;
         data->thread = thread;
+        // qsort(data->foreign_data_set, data->foreign_data_set_len, sizeof(Data), compare);
 
-        if(method == 1)
+        if(method == 1){
             pthread_create(&thread_handles[thread], NULL, nestedLoopJoin, (void *)data);
-        else if(method == 2)
+        }
+        else if(method == 2){
             pthread_create(&thread_handles[thread], NULL, mergeSortJoin, (void *)data);
+        }
         else{
             fprintf(stderr, "method error \n");
             exit(0);

@@ -79,14 +79,17 @@ int compare(const void * a, const void * b)
 
 void mergeSortJoin(Data * main_data_set, int main_data_set_len, Data * foreign_data_set, int foreign_data_set_len){
     std::vector<MatchPair> pairs;
-    qsort(main_data_set, main_data_set_len, sizeof(Data), compare);
     qsort(foreign_data_set, foreign_data_set_len, sizeof(Data), compare);
     int i = 0, j = 0;
     while( i < main_data_set_len && j < foreign_data_set_len){
         if( main_data_set[i].key == foreign_data_set[j].key ){
             pairs.push_back(MatchPair(main_data_set[i].index, foreign_data_set[j].index));
-            // i++;
-            j++;
+            if( i == main_data_set_len - 1 || j == foreign_data_set_len - 1)
+                i++;
+            else if(main_data_set[i+1].key > main_data_set[j+1].key)
+                j++;
+            else
+                i++;
         }
         else if( main_data_set[i].key < foreign_data_set[j].key){
             i++;
@@ -127,10 +130,13 @@ int main(int argc, char * argv[]){
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    if(method == 1)
+    if(method == 1){
         nestedLoopJoin(main_data_set, main_data_set_len, foreign_data_set, foreign_data_set_len);
-    else if(method == 2)
+    }
+    else if(method == 2){
+        qsort(main_data_set, main_data_set_len, sizeof(Data), compare);
         mergeSortJoin(main_data_set, main_data_set_len, foreign_data_set, foreign_data_set_len);
+    }
     else{
         fprintf(stderr, "method error \n");
         exit(0);
