@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <sys/time.h>
 #include <vector>
 #include <string>
@@ -9,7 +8,7 @@ using std::string;
 
 
 // 显示用法
-void usage(char* program_name) {
+void usage(char* program_name){
 
    fprintf(stderr, "usage: %s <join method> <foreign file index>\n", program_name);
    fprintf(stderr, "   join method = 1(nested loop join) 2(merge sort join)\n");
@@ -17,8 +16,8 @@ void usage(char* program_name) {
    exit(0);
 }
 
-void loadFile(const char * filename, Data * data_set, int data_set_len) 
-{
+// 读取数据集并格式化
+void loadFile(const char * filename, Data * data_set, int data_set_len){
     FILE *fpin;
     unsigned int* key_set = new UINT[data_set_len];
   
@@ -42,9 +41,8 @@ void loadFile(const char * filename, Data * data_set, int data_set_len)
 }
 
 
-
-void saveResult(std::vector<MatchPair> pairs) 
-{
+// 将匹配结果写入文件
+void saveResult(std::vector<MatchPair> pairs){
     FILE *fout ;    
     fout = fopen( "../result/dudu3.txt", "w" );
     char *buffer = new char[20];
@@ -57,7 +55,7 @@ void saveResult(std::vector<MatchPair> pairs)
     fclose( fout );
 }
 
-
+// 嵌套循环
 void nestedLoopJoin(Data * main_data_set, int main_data_set_len, Data * foreign_data_set, int foreign_data_set_len){
     std::vector<MatchPair> pairs;
 
@@ -72,11 +70,11 @@ void nestedLoopJoin(Data * main_data_set, int main_data_set_len, Data * foreign_
     // saveResult(pairs);
 }
 
-int compare(const void * a, const void * b)
-{
+int compare(const void * a, const void * b){
     return (*(Data *)a).key - (*(Data *)b).key;
 }
 
+// 排序合并
 void mergeSortJoin(Data * main_data_set, int main_data_set_len, Data * foreign_data_set, int foreign_data_set_len){
     std::vector<MatchPair> pairs;
     qsort(foreign_data_set, foreign_data_set_len, sizeof(Data), compare);
@@ -141,7 +139,6 @@ int main(int argc, char * argv[]){
         fprintf(stderr, "method error \n");
         exit(0);
     }
-
     
     gettimeofday(&end, NULL);
     long interval = 1000000 * ( end.tv_sec - start.tv_sec ) + end.tv_usec - start.tv_usec;  

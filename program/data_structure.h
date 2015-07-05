@@ -3,7 +3,6 @@ typedef unsigned int UINT;
 struct Data{
     UINT index;
     UINT key;
-
     Data(UINT r=0, UINT k=0){
         index = r;
         key = k;
@@ -19,8 +18,7 @@ struct MatchPair{
     }
 };
 
-struct Thread_data
-{   
+struct Thread_data{   
     int thread;
     Data * main_data_set;
     Data * foreign_data_set;
